@@ -47,7 +47,7 @@
   ],
   "main": "./lib/printer",
   "dependencies": {
-    "nan": "^2.15.0",
+    "nan": "git+https://github.com/weedz/nan.git",
     "prebuild-install": "^7.0.1"
   },
   "types": "types/index.d.ts"
