@@ -8,6 +8,8 @@ Native bind printers on POSIX and Windows OS from Node.js, electron and node-web
 
 > Prebuild and CI integration courtesy of @ekoeryanto in his [FORK](https://github.com/ekoeryanto/node-printer)
 
+> It just works with Electron Js >=30.0.0 because of @electron-printer in (https://github.com/Susheer/electron-printer)
+
 If you have a problem, ask question to [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tojocky/node-printer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) or find/create a new [Github issue](https://github.com/thiagoelg/node-printer/issues)
 
 ___
@@ -41,6 +43,18 @@ I was involved in a project where I need to print from Node.JS. This is the reas
 ```
 npm install @thiagoelg/node-printer
 ```
+### How to use this with Electron Js on Windows:
+
+In package.json, under dependencies, add the following line:
+
+```
+"@thealexbaron/node-printer": "https://github.com/Susheer/electron-printer.git",
+```
+Build this module every time postinstall, as shown below:
+
+```
+ "postinstall":"cd node_modules/@thealexbaron/node-printer && npm run electron-rebuild"
+ ```
 
 ### How to use:
 
@@ -54,6 +68,7 @@ See [examples](https://github.com/thiagoelg/node-printer/tree/main/examples)
 
 * Thiago Lugli, @thiagoelg
 * Eko Eryanto, @ekoeryanto
+* Sudheer gupta, @electron-printer
 
 Feel free to download, test and propose new futures
 
