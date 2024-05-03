@@ -31,7 +31,8 @@
     "apply-patches": "patch-package",
     "prebuild-all": "prebuild --all --force --strip --verbose --openssl_fips=X",
     "prebuild": "prebuild",
-    "rebuild": "node-gyp rebuild",
+    "rebuild":"node-gyp rebuild",
+    "electron-rebuild": "node-gyp rebuild --target_platform=win32 --target_arch=x64  --runtime=electron --target=30.0.0 --dist-url=https://electronjs.org/headers",
     "test": "nodeunit test"
   },
   "binary": {
