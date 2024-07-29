@@ -33,7 +33,7 @@
     "prebuild-all": "prebuild --all --force --strip --verbose --openssl_fips=X",
     "prebuild": "prebuild",
     "rebuild": "node-gyp rebuild",
-    "electron-rebuild": "node-gyp rebuild --target_platform=win32 --target_arch=x64  --runtime=electron --target=30.0.0 --dist-url=https://electronjs.org/headers",
+    "electron-rebuild": "node-gyp rebuild --target_platform=win32 --target_arch=x64  --runtime=electron --target=31.0.0 --dist-url=https://electronjs.org/headers",
     "clean":"python tools/remove_directory.py node_modules",
     "test": "nodeunit test"
   },
@@ -51,7 +51,7 @@
   "main": "./lib/printer",
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.11",
-    "nan": "^2.18.0",
+    "nan": "^2.20.0",
     "node-pre-gyp": "*"
   },
   "types": "types/index.d.ts"
