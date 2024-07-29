@@ -3,10 +3,8 @@ import sys
 import os
 
 def remove_directory(directory):
-    print(f'wkmfwemp"{directory}')
     try:
         shutil.rmtree(directory)
-        print(f"Directory '{directory}' removed successfully.")
     except OSError as e:
         print(f"Error: {directory} : {e.strerror}")
         sys.exit(1)
