@@ -28,7 +28,7 @@
     "electron": ">=28.1.3"
   },
   "scripts": {
-    "install": "prebuild-install || node-gyp rebuild",
+    "install": "prebuild-install || node-gyp rebuild --target=32.2.0 --arch=x64 --dist-url=https://electronjs.org/headers",
     "apply-patches": "patch-package",
     "prebuild-all": "prebuild --all --force --strip --verbose --openssl_fips=X",
     "prebuild": "prebuild",
