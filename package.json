@@ -51,7 +51,6 @@
   "main": "./lib/printer",
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.11",
-    "nan": "^2.20.0",
     "node-pre-gyp": "*"
   },
   "types": "types/index.d.ts"
