@@ -14,6 +14,13 @@
 #include <utility>
 #include <sstream>
 #include <node_version.h>
+#include <cstdio> // Include for printf
+
+// Utility function to output messages
+void ConsolePrint(const std::string& message) {
+    printf("%s\n", message.c_str());
+    fflush(stdout); // Ensure the output is flushed immediately
+}
 
 namespace{
     typedef std::map<std::string, DWORD> StatusMapType;
@@ -33,6 +40,10 @@ namespace{
         ~MemValue () {
             free();
         }
+
+        Type* get() {
+        return _value;
+        }
     protected:
         virtual void free() {
             if(_value != NULL)
@@ -41,6 +52,9 @@ namespace{
                 _value = NULL;
             }
         }
+
+    private:
+    Type* _value; // Declaration of the member variable
     };
 
     struct PrinterHandle
@@ -442,62 +456,94 @@ namespace{
 MY_NODE_MODULE_CALLBACK(getPrinters)
 {
     MY_NODE_MODULE_HANDLESCOPE;
+    //ConsolePrint("Invoked ------------ getPrinters ");
     DWORD printers_size = 0;
     DWORD printers_size_bytes = 0, dummyBytes = 0;
     DWORD Level = 2;
-    DWORD flags = PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS;// https://msdn.microsoft.com/en-us/library/cc244669.aspx
+    DWORD flags = PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS;
+
     // First try to retrieve the number of printers
-    BOOL bError = EnumPrintersW(flags, NULL, 2, NULL, 0, &printers_size_bytes, &printers_size);
-    // allocate the required memmory
-    MemValue<PRINTER_INFO_2W> printers(printers_size_bytes);
-    if(!printers)
-    {
-        RETURN_EXCEPTION_STR("Error on allocating memory for printers");
+    BOOL bError = EnumPrintersW(flags, NULL, Level, NULL, 0, &printers_size_bytes, &printers_size);
+    
+    // Check for errors in the first call
+    if (!bError && GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+        RETURN_EXCEPTION_STR("Error retrieving printer size.");
     }
 
-    bError = EnumPrintersW(flags, NULL, 2, (LPBYTE)(printers.get()), printers_size_bytes, &dummyBytes, &printers_size);
-    if(!bError)
+    // Check if we got a valid size
+    if (printers_size_bytes == 0) {
+        RETURN_EXCEPTION_STR("No printers found or invalid size returned.");
+    }
+
+    // Allocate the required memory
+    MemValue<PRINTER_INFO_2W> printers(printers_size_bytes);
+    if (!printers.get()) // Make sure to check the pointer
+    {
+        RETURN_EXCEPTION_STR("Error allocating memory for printers in getPrinters.");
+    }
+
+    // Second call to retrieve printer information
+    bError = EnumPrintersW(flags, NULL, Level, (LPBYTE)(printers.get()), printers_size_bytes, &dummyBytes, &printers_size);
+    if (!bError)
     {
         std::string error_str("Error on EnumPrinters: ");
-	error_str += getLastErrorCodeAndMessage();
+        error_str += getLastErrorCodeAndMessage();
         RETURN_EXCEPTION_STR(error_str.c_str());
     }
+
+    // Prepare result array
     v8::Local<v8::Array> result = V8_VALUE_NEW(Array, printers_size);
-    // http://msdn.microsoft.com/en-gb/library/windows/desktop/dd162845(v=vs.85).aspx
-	PRINTER_INFO_2W *printer = printers.get();
-	DWORD i = 0;
-    for(; i < printers_size; ++i, ++printer)
+    PRINTER_INFO_2W *printer = printers.get();
+    DWORD i = 0;
+    for (; i < printers_size; ++i, ++printer)
     {
         v8::Local<v8::Object> result_printer = V8_VALUE_NEW_DEFAULT(Object);
         PrinterHandle printerHandle((LPWSTR)(printer->pPrinterName));
         std::string error_str = parsePrinterInfo(printer, result_printer, printerHandle);
-        if(!error_str.empty())
+        if (!error_str.empty())
         {
             RETURN_EXCEPTION_STR(error_str.c_str());
         }
         Nan::Set(result, i, result_printer);
     }
+    
     MY_NODE_MODULE_RETURN_VALUE(result);
 }
 
 MY_NODE_MODULE_CALLBACK(getDefaultPrinterName)
 {
     MY_NODE_MODULE_HANDLESCOPE;
-    // size in chars of the printer name: https://msdn.microsoft.com/en-us/library/windows/desktop/dd144876(v=vs.85).aspx
+    
+    // Get the required size for the printer name
     DWORD cSize = 0;
-    GetDefaultPrinterW(NULL, &cSize);
-
-    if(cSize == 0) {
+    ConsolePrint("Calling GetDefaultPrinterW to get size...");
+    
+    if (!GetDefaultPrinterW(NULL, &cSize) && GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+        ConsolePrint("Failed to get printer size.");
         MY_NODE_MODULE_RETURN_VALUE(V8_STRING_NEW_UTF8(""));
     }
 
-    MemValue<uint16_t> bPrinterName(cSize*sizeof(uint16_t));
+    ConsolePrint("Printer name size: " + std::to_string(cSize));
+    
+    // Allocate memory for the printer name
+    MemValue<uint16_t> bPrinterName(cSize * sizeof(uint16_t));
+    if (!bPrinterName.get()) {
+        ConsolePrint("Memory allocation for printer name failed.");
+        MY_NODE_MODULE_RETURN_VALUE(V8_STRING_NEW_UTF8(""));
+    }
+
+    // Retrieve the printer name
     BOOL res = GetDefaultPrinterW((LPWSTR)(bPrinterName.get()), &cSize);
-
-    if(!res) {
+    if (!res) {
+         // If the call failed, you can retrieve the error code
+        DWORD error = GetLastError();
+        ConsolePrint("Failed to get printer name. Error code: " + std::to_string(error));
         MY_NODE_MODULE_RETURN_VALUE(V8_STRING_NEW_UTF8(""));
     }
 
+    ConsolePrint("Successfully retrieved printer name.");
+
+    // Return the printer name as a V8 string
     MY_NODE_MODULE_RETURN_VALUE(V8_STRING_NEW_2BYTES((uint16_t*)bPrinterName.get()));
 }
 

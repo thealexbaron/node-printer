@@ -18,9 +18,9 @@
     "url": "git://github.com/thiagoelg/node-printer.git"
   },
   "devDependencies": {
-    "node-abi": "^3.24.0",
+    "node-abi": "^3.71.0",
     "nodeunit": "*",
-    "patch-package": "^6.4.7",
+    "patch-package": "^6.5.1",
     "prebuild": "^11.0.3",
     "prebuild-ci": "^4.0.0"
   },
@@ -33,8 +33,6 @@
     "prebuild-all": "prebuild --all --force --strip --verbose --openssl_fips=X",
     "prebuild": "prebuild",
     "rebuild": "node-gyp rebuild",
-    "electron-rebuild": "node-gyp rebuild --target_platform=win32 --target_arch=x64  --runtime=electron --target=33.0.0 --dist-url=https://electronjs.org/headers",
-    "clean":"python tools/remove_directory.py node_modules",
     "test": "nodeunit test"
   },
   "binary": {
@@ -50,9 +48,10 @@
   ],
   "main": "./lib/printer",
   "dependencies": {
-       "nan": "^2.22.0",
     "@mapbox/node-pre-gyp": "^1.0.11",
-    "node-pre-gyp": "*"
+    "nan": "^2.22.0",
+    "node-pre-gyp": "*",
+    "prebuild-install": "^7.0.1"
   },
   "types": "types/index.d.ts"
 }
