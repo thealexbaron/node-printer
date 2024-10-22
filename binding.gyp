@@ -30,6 +30,7 @@
       ],
       'conditions': [
         # common exclusions
+        ['OS == "win"', { 'defines': ['NOMINMAX']}],
         ['OS!="linux"', {'sources/': [['exclude', '_linux\\.cc$']]}],
         ['OS!="mac"', {'sources/': [['exclude', '_mac\\.cc|mm?$']]}],
         ['OS!="win"', {
